@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.core.files.storage import Storage
 from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 import azure
 from azure.storage import *
 from datetime import datetime
+from time import time
 import os, mimetypes
 
 class AzureStorage(Storage):
@@ -25,7 +27,13 @@ class AzureStorage(Storage):
         content.open(mode="rb")
         data = content.read()
         content_type = mimetypes.guess_type(name)[0]
-        metadata = {"modified_time": "%f" % os.path.getmtime(content.name)}
+        
+        if type(content.file) == InMemoryUploadedFile :
+            modified_time = time.time()
+        else:
+            modified_time = os.path.getmtime(content.name)
+        metadata = {"modified_time": "%f" % modified_time}
+
         self.blob_service.put_blob(self.container, name, data, x_ms_blob_type='BlockBlob', x_ms_blob_content_type=content_type, x_ms_meta_name_values=metadata)
         return name
 
@@ -55,10 +63,10 @@ class AzureStorage(Storage):
         return properties.get('content-length')
 
     def url(self, name):
-        blob = self.blob_service.list_blobs(self.container, prefix=name)
-        return blob.blobs[0].url
+        return self.blob_service.make_blob_url(self.container, name)
 
     def modified_time(self, name):
         metadata = self.blob_service.get_blob_metadata(self.container, name)
         modified_time = float(metadata.get('x-ms-meta-modified_time'))
         return datetime.fromtimestamp(modified_time)
+
