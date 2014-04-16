@@ -2,6 +2,8 @@
 Implements a Django storage subclass for use with Azure Blob storage.
 Works for Static and Media files.
 
+This is a fork from [pepperdeck/AzureStorage](https://github.com/pepperdeck/AzureStorage) resolving problem with `_save` and `url` methods
+
 ## Set-Up
 - Install the Azure Python SDK: `pip install azure`.
 - Copy `storage.py` into your project folder.
