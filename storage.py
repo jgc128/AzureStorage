@@ -29,7 +29,7 @@ class AzureStorage(Storage):
         content_type = mimetypes.guess_type(name)[0]
         
         if type(content.file) == InMemoryUploadedFile :
-            modified_time = time.time()
+            modified_time = time()
         else:
             modified_time = os.path.getmtime(content.name)
         metadata = {"modified_time": "%f" % modified_time}
